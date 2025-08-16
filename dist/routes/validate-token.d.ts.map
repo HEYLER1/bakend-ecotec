@@ -1,0 +1,1 @@
+{"version":3,"file":"validate-token.d.ts","sourceRoot":"","sources":["../../src/routes/validate-token.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAG1D,QAAA,MAAM,aAAa,GAAI,KAAK,OAAO,EAAE,KAAK,QAAQ,EAAE,MAAM,YAAY,SAsBrE,CAAA;AAED,eAAe,aAAa,CAAC"}

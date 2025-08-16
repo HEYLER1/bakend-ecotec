@@ -1,8 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import routesProduct from '../routes/product';
 import routesUser from '../routes/user';
-import { Product } from './product';
+
 import { User } from './user';
 
 class Server {
@@ -26,7 +25,7 @@ class Server {
     }
 
     routes() {
-        this.app.use('/api/products', routesProduct);
+
         this.app.use('/api/users', routesUser);
     }
 
@@ -40,7 +39,6 @@ class Server {
 
     async dbConnect() {
         try {
-            await Product.sync()
             await User.sync();
         } catch (error) {
             console.error('Unable to connect to the database:', error);
