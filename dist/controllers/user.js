@@ -52,10 +52,12 @@ const loginUser = async (req, res) => {
         });
     }
     // Generamos token
-    const token = jsonwebtoken_1.default.sign({
-        username: username
-    }, process.env.SECRET_KEY || 'pepito123');
-    res.json(token);
+    const token = jsonwebtoken_1.default.sign({ username: username }, process.env.SECRET_KEY || 'pepito123', { expiresIn: '1h' } // ⏰ Opcional: token expira en 1 hora
+    );
+    return res.json({
+        token: token,
+        msg: 'Login exitoso'
+    });
 };
 exports.loginUser = loginUser;
 //# sourceMappingURL=user.js.map

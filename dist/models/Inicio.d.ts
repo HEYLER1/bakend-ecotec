@@ -1,2 +1,2 @@
-export declare const Product: import("sequelize").ModelCtor<import("sequelize").Model<any, any>>;
+export {};
 //# sourceMappingURL=Inicio.d.ts.map

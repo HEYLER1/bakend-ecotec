@@ -5,6 +5,7 @@ declare class Server {
     listen(): void;
     routes(): void;
     midlewares(): void;
+    frontend(): void;
     dbConnect(): Promise<void>;
 }
 export default Server;
