@@ -7,7 +7,7 @@ export const User = sequelize.define('user', {
         primaryKey: true,
         autoIncrement: true
     },
-    username: {
+    email: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
@@ -15,5 +15,23 @@ export const User = sequelize.define('user', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    activo: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: false
+    },
+    nombres: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    apellidos: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    codigo: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        unique: true
     }
-}, )
+})

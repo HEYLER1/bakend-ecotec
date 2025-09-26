@@ -1,0 +1,1 @@
+{"version":3,"file":"appConfiguracion.d.ts","sourceRoot":"","sources":["../../src/config/appConfiguracion.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAGH,qBAAa,SAAS;IAClB,OAAO,CAAC,MAAM,CAAC,UAAU,CAAuB;IAChD,OAAO,CAAC,MAAM,CAAC,iBAAiB,CAAuB;IAEvD,MAAM,CAAC,IAAI;IAsBX,MAAM,KAAK,SAAS,IAAI,MAAM,CAK7B;IAED,MAAM,KAAK,gBAAgB,IAAI,MAAM,CAKpC;CACJ;AAGD,eAAO,MAAM,aAAa,YAGzB,CAAC"}

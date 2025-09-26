@@ -12,7 +12,7 @@ exports.User = connection_1.default.define('user', {
         primaryKey: true,
         autoIncrement: true
     },
-    username: {
+    email: {
         type: sequelize_1.DataTypes.STRING,
         unique: true,
         allowNull: false
@@ -20,6 +20,24 @@ exports.User = connection_1.default.define('user', {
     password: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false
+    },
+    activo: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: false
+    },
+    nombres: {
+        type: sequelize_1.DataTypes.STRING(100),
+        allowNull: false
+    },
+    apellidos: {
+        type: sequelize_1.DataTypes.STRING(100),
+        allowNull: false
+    },
+    codigo: {
+        type: sequelize_1.DataTypes.STRING(20),
+        allowNull: true,
+        unique: true
     }
 });
 //# sourceMappingURL=user.js.map

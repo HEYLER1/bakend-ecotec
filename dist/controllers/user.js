@@ -3,61 +3,78 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.newUser = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const user_1 = require("../models/user");
+exports.logout = exports.refreshToken = exports.loginUser = exports.newUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const newUser = async (req, res) => {
-    const { username, password } = req.body;
-    // Validamos si el usuario ya existe en la base de datos
-    const user = await user_1.User.findOne({ where: { username: username } });
-    if (user) {
-        return res.status(400).json({
-            msg: `Ya existe un usuario con el nombre ${username}`
-        });
-    }
-    const hashedPassword = await bcrypt_1.default.hash(password, 10);
+const user_1 = require("../models/user");
+const appConfiguracion_1 = require("../config/appConfiguracion");
+const tokenService_1 = require("../services/tokenService");
+var newUser_controller_1 = require("./newUser.controller");
+Object.defineProperty(exports, "newUser", { enumerable: true, get: function () { return newUser_controller_1.newUser; } });
+var loginUser_controller_1 = require("./loginUser.controller");
+Object.defineProperty(exports, "loginUser", { enumerable: true, get: function () { return loginUser_controller_1.loginUser; } });
+const refreshToken = async (req, res) => {
     try {
-        // Guardarmos usuario en la base de datos
-        await user_1.User.create({
-            username: username,
-            password: hashedPassword
+        const token = req.cookies.refreshToken || req.body.refreshToken;
+        if (!token) {
+            return res.status(401).json({
+                msg: 'Refresh token no proporcionado'
+            });
+        }
+        const decoded = jsonwebtoken_1.default.verify(token, appConfiguracion_1.AppConfig.refreshSecretKey);
+        if (decoded.type !== 'refresh') {
+            return res.status(401).json({
+                msg: 'Token inválido'
+            });
+        }
+        const user = await user_1.User.findByPk(decoded.userId);
+        if (!user) {
+            return res.status(401).json({
+                msg: 'Usuario no encontrado'
+            });
+        }
+        if (!user.dataValues.activo) {
+            return res.status(401).json({
+                msg: 'Usuario inactivo. Contacte al administrador'
+            });
+        }
+        const { accessToken, refreshToken: newRefreshToken } = (0, tokenService_1.generateTokens)(decoded.userId, user.dataValues.email);
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
-        res.json({
-            msg: `Usuario ${username} creado exitosamente!`
+        return res.json({
+            accessToken,
+            msg: 'Token renovado exitosamente'
         });
     }
     catch (error) {
-        res.status(400).json({
-            msg: 'Upps ocurrio un error',
-            error
+        if (error instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+            return res.status(401).json({
+                msg: 'Refresh token inválido'
+            });
+        }
+        console.error('Error al renovar token:', error);
+        return res.status(500).json({
+            msg: 'Error interno del servidor'
         });
     }
 };
-exports.newUser = newUser;
-const loginUser = async (req, res) => {
-    const { username, password } = req.body;
-    // Validamos si el usuario existe en la base de datos
-    const user = await user_1.User.findOne({ where: { username: username } });
-    if (!user) {
-        return res.status(400).json({
-            msg: `No existe un usuario con el nombre ${username} en la base datos`
+exports.refreshToken = refreshToken;
+const logout = async (req, res) => {
+    try {
+        res.clearCookie('refreshToken');
+        return res.json({
+            msg: 'Logout exitoso'
         });
     }
-    // Validamos password
-    const passwordValid = await bcrypt_1.default.compare(password, user.password);
-    if (!passwordValid) {
-        return res.status(400).json({
-            msg: `Password Incorrecta`
+    catch (error) {
+        console.error('Error en logout:', error);
+        return res.status(500).json({
+            msg: 'Error interno del servidor'
         });
     }
-    // Generamos token
-    const token = jsonwebtoken_1.default.sign({ username: username }, process.env.SECRET_KEY || 'pepito123', { expiresIn: '1h' } // ⏰ Opcional: token expira en 1 hora
-    );
-    return res.json({
-        token: token,
-        msg: 'Login exitoso'
-    });
 };
-exports.loginUser = loginUser;
+exports.logout = logout;
 //# sourceMappingURL=user.js.map
