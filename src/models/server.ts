@@ -2,8 +2,9 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path';
 import routesUser from '../routes/user';
-
+import '../models/associations'; // 👈 AGREGAR ESTA LÍNEA
 import { User } from './user';
+import { Role } from './role'; // 👈 AGREGAR ESTA LÍNEA
 
 class Server {
     private app: Application;
@@ -12,10 +13,10 @@ class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || '3001';
+        this.dbConnect(); // 👈 MOVER ANTES de midlewares
         this.midlewares();
         this.routes();
         this.frontend();
-        this.dbConnect();
         this.listen();
     }
 
@@ -38,23 +39,24 @@ class Server {
     }
 
     frontend() {
-    const distPath = path.resolve(__dirname, "../../ecotec-unaj/dist/browser");
+        const distPath = path.resolve(__dirname, "../../ecotec-unaj/dist/browser");
 
-    // servir assets de Angular compilados
-    this.app.use(express.static(distPath));
+        // servir assets de Angular compilados
+        this.app.use(express.static(distPath));
 
-    // cualquier ruta que no sea /api → devuelve index.html
-    this.app.get(/^(?!\/api).*/, (req, res) => {
-        res.sendFile(path.join(distPath, "index.html"));
-    });
-
+        // cualquier ruta que no sea /api → devuelve index.html
+        this.app.get(/^(?!\/api).*/, (req, res) => {
+            res.sendFile(path.join(distPath, "index.html"));
+        });
     }
 
     async dbConnect() {
         try {
-            await User.sync();
+            await Role.sync(); // 👈 AGREGAR: Sincronizar Role primero
+            await User.sync(); // 👈 Luego User
+            console.log('✅ Base de datos sincronizada correctamente');
         } catch (error) {
-            console.error('Unable to connect to the database:', error);
+            console.error('❌ Error al conectar con la base de datos:', error);
         }
     }
 }

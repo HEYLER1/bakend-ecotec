@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { User } from '../models/user';
+import { User } from '../models/associations';
 import { generateTokens } from '../services/tokenService';
 
 export const loginUser = async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body; // 👈 Eliminado roleName
+        
+        console.log('Datos recibidos:', { email });
         
         if (!email || !password) {
             return res.status(400).json({
@@ -13,8 +15,16 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
         
-        // Buscar por email
-        const user = await User.findOne({ where: { email: email } });
+        const user: any = await User.findOne({ 
+            where: { email: email },
+            include: [{
+                association: 'role',
+                attributes: ['id', 'nombre', 'descripcion']
+            }]
+        });
+        
+        console.log('Usuario encontrado:', user ? 'SI' : 'NO');
+        console.log('Role del usuario:', user?.role);
         
         if (!user) {
             return res.status(401).json({
@@ -22,14 +32,16 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
         
-        // Verificar que el usuario esté activo
-        if (!user.dataValues.activo) {
+        // 👇 ELIMINADA - Ya no valida el rol seleccionado manualmente
+        // El rol viene directo de la base de datos
+        
+        if (!user.activo) {
             return res.status(401).json({
                 msg: 'Usuario inactivo. Contacte al administrador'
             });
         }
         
-        const passwordValid = await bcrypt.compare(password, user.dataValues.password);
+        const passwordValid = await bcrypt.compare(password, user.password);
         
         if (!passwordValid) {
             return res.status(401).json({
@@ -37,22 +49,35 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
         
-        // Generar tokens usando email
-        const { accessToken, refreshToken } = generateTokens(user.dataValues.id, user.dataValues.email);
+        const { accessToken, refreshToken } = generateTokens(
+            user.id, 
+            user.email,
+            user.role?.nombre // 👈 Usa el rol de la BD
+        );
         
-        // Configurar cookie segura para refresh token
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
         
-        return res.json({
-            accessToken,
-            msg: 'Login exitoso',
-            
-        });
+        const responseData = {
+            token: accessToken,
+            message: 'Login exitoso',
+            user: {
+                id: user.id,
+                email: user.email,
+                nombres: user.nombres,
+                apellidos: user.apellidos,
+                codigo: user.codigo,
+                role: user.role // 👈 El rol real de la BD
+            }
+        };
+        
+        console.log('Respuesta enviada:', JSON.stringify(responseData, null, 2));
+        
+        return res.json(responseData);
         
     } catch (error) {
         console.error('Error en login:', error);

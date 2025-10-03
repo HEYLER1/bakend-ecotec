@@ -6,13 +6,26 @@
 // Interfaz para el payload del JWT
 export interface JWTPayload {
     userId: number;
-    username: string;
+    email: string;
+    roleName?: string;
     type: 'access' | 'refresh';
 }
 
 // Interfaz para el modelo User
 export interface UserInstance {
     id: number;
-    username: string;
+    email: string;      
     password: string;
+    activo: boolean;      
+    nombres: string;     
+    apellidos: string;   
+    codigo?: string;     
+    role_id: number;      
+    role?: {              
+        id: number;
+        nombre: string;
+        descripcion?: string;
+    };
+    createdAt?: Date;     
+    updatedAt?: Date;   
 }

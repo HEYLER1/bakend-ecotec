@@ -7,17 +7,19 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const user_1 = __importDefault(require("../routes/user"));
+require("../models/associations"); // 👈 AGREGAR ESTA LÍNEA
 const user_2 = require("./user");
+const role_1 = require("./role"); // 👈 AGREGAR ESTA LÍNEA
 class Server {
     app;
     port;
     constructor() {
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || '3001';
+        this.dbConnect(); // 👈 MOVER ANTES de midlewares
         this.midlewares();
         this.routes();
         this.frontend();
-        this.dbConnect();
         this.listen();
     }
     listen() {
@@ -45,10 +47,12 @@ class Server {
     }
     async dbConnect() {
         try {
-            await user_2.User.sync();
+            await role_1.Role.sync(); // 👈 AGREGAR: Sincronizar Role primero
+            await user_2.User.sync(); // 👈 Luego User
+            console.log('✅ Base de datos sincronizada correctamente');
         }
         catch (error) {
-            console.error('Unable to connect to the database:', error);
+            console.error('❌ Error al conectar con la base de datos:', error);
         }
     }
 }

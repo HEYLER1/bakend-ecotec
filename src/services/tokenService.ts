@@ -8,16 +8,18 @@ import { JWTPayload } from '../types/auth.types';
 import { AppConfig } from '../config/appConfiguracion';
 
 // Generar tokens de acceso y refresh
-export const generateTokens = (userId: number, username: string) => {
+export const generateTokens = (userId: number, email: string, roleName?: string) => {
     const accessPayload: JWTPayload = {
         userId,
-        username,
+        email,
+        ...(roleName && { roleName }), // 👈 Solo incluye roleName si existe
         type: 'access'
     };
     
     const refreshPayload: JWTPayload = {
         userId,
-        username,
+        email,
+        ...(roleName && { roleName }), // 👈 Solo incluye roleName si existe
         type: 'refresh'
     };
     

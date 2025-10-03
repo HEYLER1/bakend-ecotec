@@ -11,15 +11,17 @@ exports.generateTokens = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const appConfiguracion_1 = require("../config/appConfiguracion");
 // Generar tokens de acceso y refresh
-const generateTokens = (userId, username) => {
+const generateTokens = (userId, email, roleName) => {
     const accessPayload = {
         userId,
-        username,
+        email,
+        ...(roleName && { roleName }), // 👈 Solo incluye roleName si existe
         type: 'access'
     };
     const refreshPayload = {
         userId,
-        username,
+        email,
+        ...(roleName && { roleName }), // 👈 Solo incluye roleName si existe
         type: 'refresh'
     };
     const accessToken = jsonwebtoken_1.default.sign(accessPayload, appConfiguracion_1.AppConfig.secretKey, { expiresIn: '15m' });
