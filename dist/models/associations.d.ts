@@ -1,4 +1,5 @@
-import { User } from './user';
-import { Role } from './role';
-export { User, Role };
+import { Usuario } from './user';
+import { Perfil } from './role';
+import { Sede } from './sede';
+export { Usuario, Perfil, Sede };
 //# sourceMappingURL=associations.d.ts.map

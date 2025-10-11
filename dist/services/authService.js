@@ -1,5 +1,106 @@
 "use strict";
+/*OJO NO SE ESTA USANDO PERO ES FUNCIONAL SIMPLIFICA Y LO HACE MAS ORDENADOLA API DE LOGIN*/
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Consulta de usuario SOLO para autenticación
+ * RESTRINGIDA a los campos mínimos necesarios ES PARA EL LOGIN, PERO AHORA NOSE ESTA USANDO POR SI CRESE Y FALATA
+ * HACER CAMBIOS, ESTA FOMRA SERIA MEJOR ESTRUCTURADO EN SIMPLES PALABRAS
+ */
+/*export const findUserForAuth = async (email: string) => {
+    return await Usuario.findOne({
+        where: { email: email.toLowerCase().trim() },
+        attributes: [
+            'id_usuario',
+            'email',
+            'password',
+            'estado',
+            'nombre',
+            'apellido',
+            'perfil_id'
+        ],
+        include: [{
+            model: Perfil,
+            as: 'perfil',
+            attributes: ['id_perfil', 'nombre']
+        }]
+    });
+};
+// authController.ts LOGINCOTROLLER
+import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+import { generateTokens } from '../services/tokenService';
+import { findUserForAuth } from '../services/authService';
+
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                msg: 'Email y password son requeridos'
+            });
+        }
+        
+        // USAR FUNCIÓN RESTRINGIDA
+        const usuario: any = await findUserForAuth(email);
+        
+        if (!usuario) {
+            return res.status(401).json({
+                msg: 'Credenciales inválidas'
+            });
+        }
+        
+        if (usuario.estado === 0) {
+            return res.status(403).json({
+                msg: 'Usuario inactivo. Contacte al administrador'
+            });
+        }
+        
+        const passwordValid = await bcrypt.compare(password, usuario.password);
+        
+        if (!passwordValid) {
+            return res.status(401).json({
+                msg: 'Credenciales inválidas'
+            });
+        }
+        
+        const { accessToken, refreshToken } = generateTokens(
+            usuario.id_usuario,
+            usuario.email,
+            usuario.perfil?.nombre
+        );
+        
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        
+        return res.json({
+            token: accessToken,
+            message: 'Login exitoso',
+            user: {
+                id_usuario: usuario.id_usuario,
+                email: usuario.email,
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                perfil: {
+                    id: usuario.perfil?.id_perfil,
+                    nombre: usuario.perfil?.nombre
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor'
+        });
+    }
+};
+
+
 /*  services/authService.ts
 import bcrypt from 'bcrypt';
 import { User } from '../models/user';

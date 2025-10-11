@@ -1,1 +1,1 @@
-{"version":3,"file":"newUser.controller.d.ts","sourceRoot":"","sources":["../../src/controllers/newUser.controller.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAI5C,eAAO,MAAM,OAAO,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,4DA4FxD,CAAC"}
+{"version":3,"file":"newUser.controller.d.ts","sourceRoot":"","sources":["../../src/controllers/newUser.controller.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAG5C,eAAO,MAAM,OAAO,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,4DA0HxD,CAAC"}

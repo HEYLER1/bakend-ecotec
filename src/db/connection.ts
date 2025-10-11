@@ -1,18 +1,23 @@
-import { Sequelize, Dialect } from "sequelize";
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
-const DB_NAME = process.env.DB_NAME || "user";
-const DB_USER = process.env.DB_USER || "root";
-const DB_PASS = process.env.DB_PASS || "";
-const DB_HOST = process.env.DB_HOST || "localhost";
+dotenv.config(); // Carga las variables del .env
 
-const allowedDialects: Dialect[] = ["mysql", "postgres", "sqlite", "mariadb", "mssql"];
-const DB_DIALECT = (allowedDialects.includes(process.env.DB_DIALECT as Dialect)
-  ? (process.env.DB_DIALECT as Dialect)
-  : "mysql");
-  
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
-  host: DB_HOST,
-  dialect: DB_DIALECT,
-  logging: false,
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME || "userpost",
+  process.env.DB_USER || "postgres",
+  process.env.DB_PASS || "",
+  {
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT) || 5432,
+    dialect: "postgres",
+    logging: false,
+  }
+);
+
+sequelize
+  .authenticate()
+  .then(() => console.log("Conectado exitosamente papicha"))
+  .catch((err) => console.error("error ps", err));
+
 export default sequelize;

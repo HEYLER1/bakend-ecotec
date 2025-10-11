@@ -1,11 +1,103 @@
+// authController.ts
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { User } from '../models/associations';
+import { Usuario } from '../models/user';
+import { Perfil } from '../models/role';
 import { generateTokens } from '../services/tokenService';
 
 export const loginUser = async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body; // 👈 Eliminado roleName
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                msg: 'Email y password son requeridos'
+            });
+        }
+        
+        // CONSULTAR SOLO LO NECESARIO
+        const usuario: any = await Usuario.findOne({ 
+            where: { email: email.toLowerCase().trim() },
+            attributes: ['id_usuario', 'email', 'password', 'estado', 'perfil_id'], // Solo campos necesarios
+            include: [{
+                model: Perfil,
+                as: 'perfil',
+                attributes: ['id_perfil', 'nombre'] // Solo nombre del perfil
+            }]
+        });
+        
+        if (!usuario) {
+            return res.status(401).json({
+                msg: 'Credenciales inválidas'
+            });
+        }
+        
+        // Verificar estado
+        if (usuario.estado === 0) {
+            return res.status(403).json({
+                msg: 'Usuario inactivo. Contacte al administrador'
+            });
+        }
+        
+        // Validar password
+        const passwordValid = await bcrypt.compare(password, usuario.password);
+        
+        if (!passwordValid) {
+            return res.status(401).json({
+                msg: 'Credenciales inválidas'
+            });
+        }
+        
+        // Generar tokens
+        const { accessToken, refreshToken } = generateTokens(
+            usuario.id_usuario, 
+            usuario.email,
+            usuario.perfil?.nombre
+        );
+        
+        // Configurar cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        
+        // Respuesta mínima
+        return res.json({
+            token: accessToken,
+            message: 'Login exitoso',
+            user: {
+                id_usuario: usuario.id_usuario,
+                email: usuario.email,
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                perfil: {
+                    id: usuario.perfil?.id_perfil,
+                    nombre: usuario.perfil?.nombre
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor'
+        });
+    }
+};
+
+
+
+/*import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+import { Usuario } from '../models/user';
+import { Perfil } from '../models/role';
+import { generateTokens } from '../services/tokenService';
+
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
         
         console.log('Datos recibidos:', { email });
         
@@ -15,33 +107,32 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
         
-        const user: any = await User.findOne({ 
+        const usuario: any = await Usuario.findOne({ 
             where: { email: email },
             include: [{
-                association: 'role',
-                attributes: ['id', 'nombre', 'descripcion']
+                model: Perfil,
+                as: 'perfil',
+                attributes: ['id_perfil', 'nombre', 'descripcion']
             }]
         });
         
-        console.log('Usuario encontrado:', user ? 'SI' : 'NO');
-        console.log('Role del usuario:', user?.role);
+        console.log('Usuario encontrado:', usuario ? 'SI' : 'NO');
+        console.log('Perfil del usuario:', usuario?.perfil);
         
-        if (!user) {
+        if (!usuario) {
             return res.status(401).json({
                 msg: 'Credenciales inválidas'
             });
         }
         
-        // 👇 ELIMINADA - Ya no valida el rol seleccionado manualmente
-        // El rol viene directo de la base de datos
-        
-        if (!user.activo) {
+        // Verificar estado del usuario (0 = inactivo, 1 = activo)
+        if (usuario.estado === 0) {
             return res.status(401).json({
                 msg: 'Usuario inactivo. Contacte al administrador'
             });
         }
         
-        const passwordValid = await bcrypt.compare(password, user.password);
+        const passwordValid = await bcrypt.compare(password, usuario.password);
         
         if (!passwordValid) {
             return res.status(401).json({
@@ -50,9 +141,9 @@ export const loginUser = async (req: Request, res: Response) => {
         }
         
         const { accessToken, refreshToken } = generateTokens(
-            user.id, 
-            user.email,
-            user.role?.nombre // 👈 Usa el rol de la BD
+            usuario.id_usuario, 
+            usuario.email,
+            usuario.perfil?.nombre
         );
         
         res.cookie('refreshToken', refreshToken, {
@@ -66,12 +157,16 @@ export const loginUser = async (req: Request, res: Response) => {
             token: accessToken,
             message: 'Login exitoso',
             user: {
-                id: user.id,
-                email: user.email,
-                nombres: user.nombres,
-                apellidos: user.apellidos,
-                codigo: user.codigo,
-                role: user.role // 👈 El rol real de la BD
+                id_usuario: usuario.id_usuario,
+                email: usuario.email,
+                usuario: usuario.usuario,
+                dni: usuario.dni,
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                telefono: usuario.telefono,
+                perfil: usuario.perfil,
+                estado: usuario.estado,
+                fecha_creacion: usuario.fecha_creacion
             }
         };
         
@@ -85,4 +180,4 @@ export const loginUser = async (req: Request, res: Response) => {
             msg: 'Error interno del servidor'
         });
     }
-};
+};*/
