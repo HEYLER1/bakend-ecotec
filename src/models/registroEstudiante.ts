@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db/connection';
 
-export const RegistroPersonal = sequelize.define('registro_personal', {
-    id_registro_personal: {
+export const RegistroEstudiante = sequelize.define('registro_estudiante', {
+    id_registro_estudiante: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -23,13 +23,9 @@ export const RegistroPersonal = sequelize.define('registro_personal', {
             key: 'id_edificio'
         }
     },
-    tipo_recoleccion_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'tipo_recoleccion',
-            key: 'id_tipo_recoleccion'
-        }
+    codigo_pila: {
+        type: DataTypes.STRING(50),
+        allowNull: false
     },
     observaciones: {
         type: DataTypes.TEXT,
@@ -48,6 +44,6 @@ export const RegistroPersonal = sequelize.define('registro_personal', {
         }
     }
 }, {
-    tableName: 'registro_personal',
+    tableName: 'registro_estudiante',
     timestamps: false
 });

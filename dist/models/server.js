@@ -3,26 +3,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/models/server.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
-const user_1 = __importDefault(require("../routes/user"));
-const sede_1 = __importDefault(require("../routes/sede"));
-const edificio_1 = __importDefault(require("../routes/edificio"));
-const tipoRecoleccion_1 = __importDefault(require("../routes/tipoRecoleccion"));
-const registroPersonal_1 = __importDefault(require("../routes/registroPersonal"));
-const perfil_1 = __importDefault(require("../routes/perfil")); // 👈 NUEVO - Importar rutas de perfil
-require("../models/associations");
-const user_2 = require("./user");
+const connection_1 = __importDefault(require("../db/connection"));
 const role_1 = require("./role");
-const sede_2 = require("./sede");
-const edificio_2 = require("./edificio");
-const tipoRecoleccion_2 = require("./tipoRecoleccion");
-const registroPersonal_2 = require("./registroPersonal");
+const user_1 = require("./user");
+const sede_1 = require("./sede");
+const edificio_1 = require("./edificio");
+const tipoRecoleccion_1 = require("./tipoRecoleccion");
+const registroPersonal_1 = require("./registroPersonal");
 const detallePersonalPilas_1 = require("./detallePersonalPilas");
 const detallePersonalCanastillas_1 = require("./detallePersonalCanastillas");
 const detallePersonalTacho_1 = require("./detallePersonalTacho");
+const registroEstudiante_1 = require("./registroEstudiante");
+const detalleEstudianteVerificacion_1 = require("./detalleEstudianteVerificacion");
+const associations_1 = require("./associations");
+const user_2 = __importDefault(require("../routes/user"));
+const sede_2 = __importDefault(require("../routes/sede"));
+const edificio_2 = __importDefault(require("../routes/edificio"));
+const tipoRecoleccion_2 = __importDefault(require("../routes/tipoRecoleccion"));
+const registroPersonal_2 = __importDefault(require("../routes/registroPersonal"));
+const registroEstudiante_routes_1 = __importDefault(require("../routes/registroEstudiante.routes"));
+const perfil_1 = __importDefault(require("../routes/perfil"));
 class Server {
     app;
     port;
@@ -41,11 +44,12 @@ class Server {
         });
     }
     routes() {
-        this.app.use('/api/users', user_1.default);
-        this.app.use('/api/sedes', sede_1.default);
-        this.app.use('/api/edificios', edificio_1.default);
-        this.app.use('/api/tipos-recoleccion', tipoRecoleccion_1.default);
-        this.app.use('/api/registros-personal', registroPersonal_1.default);
+        this.app.use('/api/users', user_2.default);
+        this.app.use('/api/sedes', sede_2.default);
+        this.app.use('/api/edificios', edificio_2.default);
+        this.app.use('/api/tipos-recoleccion', tipoRecoleccion_2.default);
+        this.app.use('/api/registros-personal', registroPersonal_2.default);
+        this.app.use('/api/registros-estudiante', registroEstudiante_routes_1.default);
         this.app.use('/api/profile', perfil_1.default);
     }
     midlewares() {
@@ -61,16 +65,21 @@ class Server {
     }
     async dbConnect() {
         try {
-            // ✅ Sincronizar en orden: tablas padre primero
-            await role_1.Perfil.sync(); // 1️⃣ Tabla independiente
-            await user_2.Usuario.sync(); // 2️⃣ Depende de Perfil
-            await sede_2.Sede.sync(); // 3️⃣ Tabla independiente
-            await edificio_2.Edificio.sync(); // 4️⃣ Depende de Sede
-            await tipoRecoleccion_2.TipoRecoleccion.sync(); // 5️⃣ Tabla independiente
-            await registroPersonal_2.RegistroPersonal.sync(); // 6️⃣ Depende de Usuario, Edificio, TipoRecoleccion
-            await detallePersonalPilas_1.DetallePersonalPilas.sync(); // 7️⃣ Depende de RegistroPersonal
-            await detallePersonalCanastillas_1.DetallePersonalCanastillas.sync(); // 8️⃣ Depende de RegistroPersonal
-            await detallePersonalTacho_1.DetallePersonalTacho.sync(); // 9️⃣ Depende de RegistroPersonal
+            await connection_1.default.authenticate();
+            console.log('Conectado exitosamente a la base de datos');
+            (0, associations_1.setupAssociations)();
+            console.log('Asociaciones configuradas');
+            await role_1.Perfil.sync();
+            await user_1.Usuario.sync();
+            await sede_1.Sede.sync();
+            await edificio_1.Edificio.sync();
+            await tipoRecoleccion_1.TipoRecoleccion.sync();
+            await registroPersonal_1.RegistroPersonal.sync();
+            await detallePersonalPilas_1.DetallePersonalPilas.sync();
+            await detallePersonalCanastillas_1.DetallePersonalCanastillas.sync();
+            await detallePersonalTacho_1.DetallePersonalTacho.sync();
+            await registroEstudiante_1.RegistroEstudiante.sync();
+            await detalleEstudianteVerificacion_1.DetalleEstudianteVerificacion.sync();
             console.log('Base de datos sincronizada correctamente');
         }
         catch (error) {

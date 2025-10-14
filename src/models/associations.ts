@@ -1,49 +1,123 @@
-// src/models/associations.ts
-// src/models/associations.ts
 import { Usuario } from './user';
 import { Perfil } from './role';
 import { Sede } from './sede';
 import { Edificio } from './edificio';
+import { TipoRecoleccion } from './tipoRecoleccion';
+import { RegistroPersonal } from './registroPersonal';
+import { DetallePersonalPilas } from './detallePersonalPilas';
+import { DetallePersonalCanastillas } from './detallePersonalCanastillas';
+import { DetallePersonalTacho } from './detallePersonalTacho';
+import { RegistroEstudiante } from './registroEstudiante';
+import { DetalleEstudianteVerificacion } from './detalleEstudianteVerificacion';
 
-// Relación User - Role
-Usuario.belongsTo(Perfil, {
-    foreignKey: 'perfil_id',
-    as: 'perfil'
-});
+export const setupAssociations = () => {
+    // Usuario - Perfil
+    Usuario.belongsTo(Perfil, {
+        foreignKey: 'perfil_id',
+        as: 'perfil'
+    });
+    Perfil.hasMany(Usuario, {
+        foreignKey: 'perfil_id',
+        as: 'usuarios'
+    });
 
-Perfil.hasMany(Usuario, {
-    foreignKey: 'perfil_id',
-    as: 'usuarios'
-});
+    // Edificio - Sede
+    Edificio.belongsTo(Sede, {
+        foreignKey: 'sede_id',
+        as: 'sede'
+    });
+    Sede.hasMany(Edificio, {
+        foreignKey: 'sede_id',
+        as: 'edificios'
+    });
 
-// Relación Sede - Edificio
-Sede.hasMany(Edificio, {
-    foreignKey: 'id_sede',
-    as: 'edificios'
-});
+    // RegistroPersonal - Usuario
+    RegistroPersonal.belongsTo(Usuario, {
+        foreignKey: 'usuario_id',
+        as: 'usuario'
+    });
+    Usuario.hasMany(RegistroPersonal, {
+        foreignKey: 'usuario_id',
+        as: 'registros_personal'
+    });
 
-Edificio.belongsTo(Sede, {
-    foreignKey: 'id_sede',
-    as: 'sede'
-});
+    // RegistroPersonal - Edificio
+    RegistroPersonal.belongsTo(Edificio, {
+        foreignKey: 'edificio_id',
+        as: 'edificio'
+    });
+    Edificio.hasMany(RegistroPersonal, {
+        foreignKey: 'edificio_id',
+        as: 'registros_personal'
+    });
 
-// Exportar todos los modelos
-export { Usuario, Perfil, Sede };
+    // RegistroPersonal - TipoRecoleccion
+    RegistroPersonal.belongsTo(TipoRecoleccion, {
+        foreignKey: 'tipo_recoleccion_id',
+        as: 'tipo_recoleccion'
+    });
+    TipoRecoleccion.hasMany(RegistroPersonal, {
+        foreignKey: 'tipo_recoleccion_id',
+        as: 'registros'
+    });
 
-/*
-import { User } from './user';
-import { Role } from './role';
+    // RegistroPersonal - DetallePersonalPilas (1:1)
+    RegistroPersonal.hasOne(DetallePersonalPilas, {
+        foreignKey: 'registro_personal_id',
+        as: 'detalle_pilas'
+    });
+    DetallePersonalPilas.belongsTo(RegistroPersonal, {
+        foreignKey: 'registro_personal_id',
+        as: 'registro'
+    });
 
+    // RegistroPersonal - DetallePersonalCanastillas (1:1)
+    RegistroPersonal.hasOne(DetallePersonalCanastillas, {
+        foreignKey: 'registro_personal_id',
+        as: 'detalle_canastillas'
+    });
+    DetallePersonalCanastillas.belongsTo(RegistroPersonal, {
+        foreignKey: 'registro_personal_id',
+        as: 'registro'
+    });
 
-User.belongsTo(Role, {
-    foreignKey: 'role_id',
-    as: 'role'
-});
+    // RegistroPersonal - DetallePersonalTacho (1:1)
+    RegistroPersonal.hasOne(DetallePersonalTacho, {
+        foreignKey: 'registro_personal_id',
+        as: 'detalle_tacho'
+    });
+    DetallePersonalTacho.belongsTo(RegistroPersonal, {
+        foreignKey: 'registro_personal_id',
+        as: 'registro'
+    });
 
+    // RegistroEstudiante - Usuario
+    RegistroEstudiante.belongsTo(Usuario, {
+        foreignKey: 'usuario_id',
+        as: 'usuario'
+    });
+    Usuario.hasMany(RegistroEstudiante, {
+        foreignKey: 'usuario_id',
+        as: 'registros_estudiante'
+    });
 
-Role.hasMany(User, {
-    foreignKey: 'role_id',
-    as: 'users'
-});
+    // RegistroEstudiante - Edificio
+    RegistroEstudiante.belongsTo(Edificio, {
+        foreignKey: 'edificio_id',
+        as: 'edificio'
+    });
+    Edificio.hasMany(RegistroEstudiante, {
+        foreignKey: 'edificio_id',
+        as: 'registros_estudiante'
+    });
 
-export { User, Role };*/
+    // RegistroEstudiante - DetalleEstudianteVerificacion (1:1)
+    RegistroEstudiante.hasOne(DetalleEstudianteVerificacion, {
+        foreignKey: 'registro_estudiante_id',
+        as: 'verificacion'
+    });
+    DetalleEstudianteVerificacion.belongsTo(RegistroEstudiante, {
+        foreignKey: 'registro_estudiante_id',
+        as: 'registro'
+    });
+};

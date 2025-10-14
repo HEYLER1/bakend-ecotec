@@ -1,9 +1,8 @@
-// src/models/edificio.ts
 import { DataTypes } from 'sequelize';
 import sequelize from '../db/connection';
 
 export const Edificio = sequelize.define('edificio', {
-    id: {
+    id_edificio: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -12,17 +11,22 @@ export const Edificio = sequelize.define('edificio', {
         type: DataTypes.STRING(100),
         allowNull: false
     },
-    id_sede: {
+    sede_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'sede',
+            key: 'id_sede'
+        }
     },
-    activo: {
-        type: DataTypes.BOOLEAN,  // ← Cambiar a BOOLEAN
-        defaultValue: true
+    estado: {
+        type: DataTypes.SMALLINT,
+        defaultValue: 1,
+        validate: {
+            isIn: [[0, 1]]
+        }
     }
 }, {
-    tableName: 'edificios',
-    timestamps: true,
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    tableName: 'edificio',
+    timestamps: false
 });

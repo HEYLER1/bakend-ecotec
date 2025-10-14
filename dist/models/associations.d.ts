@@ -1,5 +1,2 @@
-import { Usuario } from './user';
-import { Perfil } from './role';
-import { Sede } from './sede';
-export { Usuario, Perfil, Sede };
+export declare const setupAssociations: () => void;
 //# sourceMappingURL=associations.d.ts.map

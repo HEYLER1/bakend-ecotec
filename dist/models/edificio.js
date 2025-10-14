@@ -4,11 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Edificio = void 0;
-// src/models/edificio.ts
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../db/connection"));
 exports.Edificio = connection_1.default.define('edificio', {
-    id: {
+    id_edificio: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -17,18 +16,23 @@ exports.Edificio = connection_1.default.define('edificio', {
         type: sequelize_1.DataTypes.STRING(100),
         allowNull: false
     },
-    id_sede: {
+    sede_id: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'sede',
+            key: 'id_sede'
+        }
     },
-    activo: {
-        type: sequelize_1.DataTypes.BOOLEAN, // ← Cambiar a BOOLEAN
-        defaultValue: true
+    estado: {
+        type: sequelize_1.DataTypes.SMALLINT,
+        defaultValue: 1,
+        validate: {
+            isIn: [[0, 1]]
+        }
     }
 }, {
-    tableName: 'edificios',
-    timestamps: true,
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    tableName: 'edificio',
+    timestamps: false
 });
 //# sourceMappingURL=edificio.js.map

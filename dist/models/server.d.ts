@@ -1,4 +1,3 @@
-import '../models/associations';
 declare class Server {
     private app;
     private port;

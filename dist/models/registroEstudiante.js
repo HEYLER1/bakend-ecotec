@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegistroPersonal = void 0;
+exports.RegistroEstudiante = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../db/connection"));
-exports.RegistroPersonal = connection_1.default.define('registro_personal', {
-    id_registro_personal: {
+exports.RegistroEstudiante = connection_1.default.define('registro_estudiante', {
+    id_registro_estudiante: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -28,13 +28,9 @@ exports.RegistroPersonal = connection_1.default.define('registro_personal', {
             key: 'id_edificio'
         }
     },
-    tipo_recoleccion_id: {
-        type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'tipo_recoleccion',
-            key: 'id_tipo_recoleccion'
-        }
+    codigo_pila: {
+        type: sequelize_1.DataTypes.STRING(50),
+        allowNull: false
     },
     observaciones: {
         type: sequelize_1.DataTypes.TEXT,
@@ -53,7 +49,7 @@ exports.RegistroPersonal = connection_1.default.define('registro_personal', {
         }
     }
 }, {
-    tableName: 'registro_personal',
+    tableName: 'registro_estudiante',
     timestamps: false
 });
-//# sourceMappingURL=registroPersonal.js.map
+//# sourceMappingURL=registroEstudiante.js.map

@@ -1,16 +1,10 @@
-// src/models/server.ts
 import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path';
-import routesUser from '../routes/user';
-import routesSede from '../routes/sede'; 
-import routesEdificio from '../routes/edificio';
-import routesTipoRecoleccion from '../routes/tipoRecoleccion';
-import routesRegistroPersonal from '../routes/registroPersonal';
-import routesProfile from '../routes/perfil'; // 👈 NUEVO - Importar rutas de perfil
-import '../models/associations'; 
+import sequelize from '../db/connection';
+
+import { Perfil } from './role';
 import { Usuario } from './user';
-import { Perfil } from './role'; 
 import { Sede } from './sede';
 import { Edificio } from './edificio';
 import { TipoRecoleccion } from './tipoRecoleccion';
@@ -18,6 +12,18 @@ import { RegistroPersonal } from './registroPersonal';
 import { DetallePersonalPilas } from './detallePersonalPilas';
 import { DetallePersonalCanastillas } from './detallePersonalCanastillas';
 import { DetallePersonalTacho } from './detallePersonalTacho';
+import { RegistroEstudiante } from './registroEstudiante';
+import { DetalleEstudianteVerificacion } from './detalleEstudianteVerificacion';
+
+import { setupAssociations } from './associations';
+
+import routesUser from '../routes/user';
+import routesSede from '../routes/sede'; 
+import routesEdificio from '../routes/edificio';
+import routesTipoRecoleccion from '../routes/tipoRecoleccion';
+import routesRegistroPersonal from '../routes/registroPersonal';
+import routesRegistroEstudiante from '../routes/registroEstudiante.routes';
+import routesProfile from '../routes/perfil';
 
 class Server {
     private app: Application;
@@ -26,7 +32,7 @@ class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || '3001';
-        this.dbConnect(); 
+        this.dbConnect();
         this.midlewares();
         this.routes();
         this.frontend();
@@ -45,7 +51,8 @@ class Server {
         this.app.use('/api/edificios', routesEdificio);
         this.app.use('/api/tipos-recoleccion', routesTipoRecoleccion);
         this.app.use('/api/registros-personal', routesRegistroPersonal);
-        this.app.use('/api/profile', routesProfile); 
+        this.app.use('/api/registros-estudiante', routesRegistroEstudiante);
+        this.app.use('/api/profile', routesProfile);
     }
 
     midlewares() {
@@ -63,16 +70,23 @@ class Server {
 
     async dbConnect() {
         try {
-            // ✅ Sincronizar en orden: tablas padre primero
-            await Perfil.sync();          // 1️⃣ Tabla independiente
-            await Usuario.sync();         // 2️⃣ Depende de Perfil
-            await Sede.sync();            // 3️⃣ Tabla independiente
-            await Edificio.sync();        // 4️⃣ Depende de Sede
-            await TipoRecoleccion.sync(); // 5️⃣ Tabla independiente
-            await RegistroPersonal.sync(); // 6️⃣ Depende de Usuario, Edificio, TipoRecoleccion
-            await DetallePersonalPilas.sync(); // 7️⃣ Depende de RegistroPersonal
-            await DetallePersonalCanastillas.sync(); // 8️⃣ Depende de RegistroPersonal
-            await DetallePersonalTacho.sync(); // 9️⃣ Depende de RegistroPersonal
+            await sequelize.authenticate();
+            console.log('Conectado exitosamente a la base de datos');
+
+            setupAssociations();
+            console.log('Asociaciones configuradas');
+
+            await Perfil.sync();
+            await Usuario.sync();
+            await Sede.sync();
+            await Edificio.sync();
+            await TipoRecoleccion.sync();
+            await RegistroPersonal.sync();
+            await DetallePersonalPilas.sync();
+            await DetallePersonalCanastillas.sync();
+            await DetallePersonalTacho.sync();
+            await RegistroEstudiante.sync();
+            await DetalleEstudianteVerificacion.sync();
             
             console.log('Base de datos sincronizada correctamente');
         } catch (error) {

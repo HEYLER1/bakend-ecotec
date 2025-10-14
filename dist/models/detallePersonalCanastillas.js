@@ -4,28 +4,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DetallePersonalCanastillas = void 0;
-// src/models/detallePersonalCanastillas.ts
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../db/connection"));
 exports.DetallePersonalCanastillas = connection_1.default.define('detalle_personal_canastillas', {
-    id: {
+    id_detalle_canastillas: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    id_registro: {
+    registro_personal_id: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
-        unique: true
+        unique: true,
+        references: {
+            model: 'registro_personal',
+            key: 'id_registro_personal'
+        }
     },
     plasticos_kg: {
         type: sequelize_1.DataTypes.DECIMAL(10, 2),
+        allowNull: false,
         defaultValue: 0.00
     }
 }, {
-    tableName: 'detalles_personal_canastillas',
-    timestamps: true,
-    createdAt: 'created_at', // ← Con guion bajo
-    updatedAt: 'updated_at' // ← Con guion bajo
+    tableName: 'detalle_personal_canastillas',
+    timestamps: false
 });
 //# sourceMappingURL=detallePersonalCanastillas.js.map
