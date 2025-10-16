@@ -10,15 +10,18 @@ exports.Edificio = connection_1.default.define('edificio', {
     id_edificio: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        field: 'id_edificio' // ✅ IMPORTANTE: Especifica el nombre real de la columna
     },
     nombre: {
         type: sequelize_1.DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
+        field: 'nombre'
     },
     sede_id: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
+        field: 'sede_id', // ✅ IMPORTANTE: Especifica el nombre real de la columna
         references: {
             model: 'sede',
             key: 'id_sede'
@@ -27,12 +30,11 @@ exports.Edificio = connection_1.default.define('edificio', {
     estado: {
         type: sequelize_1.DataTypes.SMALLINT,
         defaultValue: 1,
-        validate: {
-            isIn: [[0, 1]]
-        }
+        field: 'estado' // ✅ IMPORTANTE: Especifica el nombre real de la columna
     }
 }, {
     tableName: 'edificio',
-    timestamps: false
+    timestamps: false,
+    underscored: false // ✅ IMPORTANTE: Desactiva la conversión automática a snake_case
 });
 //# sourceMappingURL=edificio.js.map

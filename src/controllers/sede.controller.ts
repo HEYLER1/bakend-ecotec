@@ -2,10 +2,60 @@
 import { Request, Response } from 'express';
 import { Sede } from '../models/sede';
 
+
+export const getSedes = async (req: Request, res: Response) => {
+    try {
+        const sedes = await Sede.findAll({
+            attributes: ['id_sede', 'nombre', 'imagen', 'estado'],
+            where: { estado: 1 },
+            order: [['nombre', 'ASC']]
+        });
+        
+        return res.json({
+            success: true,
+            data: sedes
+        });
+    } catch (error) {
+        console.error('Error al obtener sedes:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al obtener las sedes'
+        });
+    }
+};
+
+// ✅ NUEVO
+export const getSedeById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        const sede = await Sede.findByPk(id, {
+            attributes: ['id_sede', 'nombre', 'imagen', 'estado']
+        });
+
+        if (!sede) {
+            return res.status(404).json({
+                success: false,
+                msg: 'Sede no encontrada'
+            });
+        }
+
+        return res.json({
+            success: true,
+            data: sede
+        });
+    } catch (error) {
+        console.error('Error al obtener sede:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al obtener la sede'
+        });
+    }
+};
 /**
  * Obtener todas las sedes activas
  */
-export const getSedes = async (req: Request, res: Response) => {
+/*export const getSedes = async (req: Request, res: Response) => {
     try {
         const sedes = await Sede.findAll({
             where: { estado: 1 }, 

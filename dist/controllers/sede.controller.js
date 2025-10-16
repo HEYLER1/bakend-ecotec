@@ -1,15 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSedes = void 0;
+exports.getSedeById = exports.getSedes = void 0;
 const sede_1 = require("../models/sede");
-/**
- * Obtener todas las sedes activas
- */
 const getSedes = async (req, res) => {
     try {
         const sedes = await sede_1.Sede.findAll({
+            attributes: ['id_sede', 'nombre', 'imagen', 'estado'],
             where: { estado: 1 },
-            attributes: ['id_sede', 'nombre', 'imagen'],
             order: [['nombre', 'ASC']]
         });
         return res.json({
@@ -26,6 +23,57 @@ const getSedes = async (req, res) => {
     }
 };
 exports.getSedes = getSedes;
+// ✅ NUEVO
+const getSedeById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sede = await sede_1.Sede.findByPk(id, {
+            attributes: ['id_sede', 'nombre', 'imagen', 'estado']
+        });
+        if (!sede) {
+            return res.status(404).json({
+                success: false,
+                msg: 'Sede no encontrada'
+            });
+        }
+        return res.json({
+            success: true,
+            data: sede
+        });
+    }
+    catch (error) {
+        console.error('Error al obtener sede:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al obtener la sede'
+        });
+    }
+};
+exports.getSedeById = getSedeById;
+/**
+ * Obtener todas las sedes activas
+ */
+/*export const getSedes = async (req: Request, res: Response) => {
+    try {
+        const sedes = await Sede.findAll({
+            where: { estado: 1 },
+            attributes: ['id_sede', 'nombre', 'imagen'],
+            order: [['nombre', 'ASC']]
+        });
+        
+        return res.json({
+            success: true,
+            data: sedes
+        });
+        
+    } catch (error) {
+        console.error('Error al obtener sedes:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al obtener las sedes'
+        });
+    }
+};
 /*import { Request, Response } from 'express';
 import { Sede } from '../models/sede';
 

@@ -6,9 +6,6 @@ import { Edificio } from '../models/edificio';
 import { Sede } from '../models/sede';
 import sequelize from '../db/connection';
 
-/**
- * Crear registro de estudiante con verificación de residuos
- */
 export const createRegistroEstudiante = async (req: Request, res: Response) => {
     const id_usuario = req.usuario?.id_usuario;
 
@@ -16,6 +13,35 @@ export const createRegistroEstudiante = async (req: Request, res: Response) => {
         return res.status(401).json({
             success: false,
             msg: 'Usuario no autenticado'
+        });
+    }
+
+    // ✅ VALIDAR QUE EL USUARIO SEA ESTUDIANTE
+    try {
+        const usuario = await Usuario.findByPk(id_usuario, {
+            attributes: ['id_usuario', 'perfil_id']
+        }) as any;
+
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                msg: 'Usuario no encontrado'
+            });
+        }
+
+        // Verificar que sea Estudiante (perfil_id = 2) o Administrador (perfil_id = 3)
+        if (usuario.perfil_id !== 2 && usuario.perfil_id !== 3) {
+            return res.status(403).json({
+                success: false,
+                msg: 'No tienes permisos para crear registros de estudiante. Solo estudiantes y administradores pueden realizar esta acción.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error al verificar permisos del usuario:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al verificar permisos del usuario'
         });
     }
 

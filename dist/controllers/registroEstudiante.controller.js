@@ -10,15 +10,38 @@ const user_1 = require("../models/user");
 const edificio_1 = require("../models/edificio");
 const sede_1 = require("../models/sede");
 const connection_1 = __importDefault(require("../db/connection"));
-/**
- * Crear registro de estudiante con verificación de residuos
- */
 const createRegistroEstudiante = async (req, res) => {
     const id_usuario = req.usuario?.id_usuario;
     if (!id_usuario) {
         return res.status(401).json({
             success: false,
             msg: 'Usuario no autenticado'
+        });
+    }
+    // ✅ VALIDAR QUE EL USUARIO SEA ESTUDIANTE
+    try {
+        const usuario = await user_1.Usuario.findByPk(id_usuario, {
+            attributes: ['id_usuario', 'perfil_id']
+        });
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                msg: 'Usuario no encontrado'
+            });
+        }
+        // Verificar que sea Estudiante (perfil_id = 2) o Administrador (perfil_id = 3)
+        if (usuario.perfil_id !== 2 && usuario.perfil_id !== 3) {
+            return res.status(403).json({
+                success: false,
+                msg: 'No tienes permisos para crear registros de estudiante. Solo estudiantes y administradores pueden realizar esta acción.'
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error al verificar permisos del usuario:', error);
+        return res.status(500).json({
+            success: false,
+            msg: 'Error al verificar permisos del usuario'
         });
     }
     const { edificio_id, codigo_pila, observaciones, verificacion } = req.body;
